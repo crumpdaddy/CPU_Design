@@ -1,0 +1,44 @@
+COPC 100 $R6 #Address of m
+COPC 1 $R7 #1
+COPC 0 $R0 #Zero reg
+LOAD $R1 $R6 #M to reg 1
+ADD $R6 $R6 $R7 #Increment reg 6
+LOAD $R2 $R6 #N to reg 2
+COPC *end $R3 #Return address
+PUSH $R3 #Save return
+PUSH $R1 #Save M
+PUSH $R2 #Save N
+:ack POP $R2 #Save N to reg2
+POP $R1 #Save M to reg1
+COMP $R1 $R0 #Compare M to 0
+JMPE *caseOne #If M = 0
+COMP $R2 $R0 #Compare N to 0
+JMPE *caseTwo #If M > 0 and N = 0
+PUSH $R1 #Save M before it solves for new N
+COPC *caseThree $R3 #Return address to end of case 3
+PUSH $R3 #Save return address
+PUSH $R1 #Save M
+ADDI -1 $R2 #N = N - 1
+PUSH $R2 #Save N
+JUMP *ack #Recursively jump to ack
+:caseThree POP $R2 #Save N
+POP $R1 #Save M
+ADDI -1 $R1 #M = M - 1
+PUSH $R1 #Save M
+PUSH $R2 #Save N
+JUMP *ack #Recursively jump
+:caseOne POP $R3 #save Return to reg3
+ADDI 1 $R2 #N = N + 1
+POP $R1 #Save M
+PUSH $R1 #Save M
+PUSH $R2 #Save N
+JUMP $R3 #Jump to return address
+:caseTwo COPC 1 $R2 #Set N to 1
+ADDI -1 $R1 #M = M - 1
+PUSH $R1 #Save M
+PUSH $R2 #Save N
+JUMP *ack #Jump back to ack recursively
+:end POP $R15 #Return result branch
+ADD $R6 $R6 $R7 #increment reg 6
+STOR $R6 $R15 #Save Result in memory
+HALT #Halt

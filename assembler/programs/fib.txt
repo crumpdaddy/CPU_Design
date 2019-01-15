@@ -1,0 +1,23 @@
+COPC 100 $R6 #Address of input data
+LOAD $R0 $R6 #Copy input to reg 0
+COPC 101 $R15 #Address to output result
+COPC 0 $R1 #Zero
+COMP $R0 $R1 #Check if input is zero
+JMPE *return
+PUSH $R1 #push 0 to stack
+COPC 01 $R1 #set reg 1 to 1
+COMP $R0 $R1 #check if input is 1
+JMPE *return
+ADDI -1 $R0 #subtract 1 from input
+PUSH $R1 #sve 1 to stack
+:fib POP $R2 #pop bigger number
+POP $R3 #pop smaller number
+ADD $R3 $R3 $R2 #add 2 numbers
+PUSH $R2 #save smaller number
+PUSH $R3 #save bigger number
+ADDI -1 $R0 #subtract 1 from input
+JMPE *return
+JUMP *fib
+:return POP $R2
+STOR $R15 $R2
+HALT
