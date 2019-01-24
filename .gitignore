@@ -5,3 +5,12 @@ assembler/assembler.iml
 *.html
 assembler/.DS_Store
 .DS_Store
+*.png
+assembler/programs/tetris.txt
+cpu/~$design_exp.xlsx
+cpu/vvp/bench_datapath
+cpu/vvp/bench_regFile
+cpu/vvp/bench_mux
+cpu/vvp/bench_control
+cpu/vvp/bench_comparator
+cpu/vvp/bench_alu
