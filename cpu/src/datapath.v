@@ -4,50 +4,61 @@
 
 module datapath (
 	input clk, reset,
-	input [3:0] inr,
-	input [15:0] readData,
+	input [15:0] readData, programData
 	output reg WE,
-	output [15:0] outvalue,
 	output reg [15:0] writeData,
-	output reg [9:0] address);
+	output reg [9:0] address, programAddress);
 
 	wire [15:0] aluInY, regX, regY, regWriteIn, aluOut, aluMuxWire, constMuxWire;
 	reg [3:0] opcode;
 	reg [9:0] pc, sp, addr;
 	reg [11:0] dataIn;
-	wire [9:0] controlOut;
+	wire [9:0] controlOut, controlOutIn;
 	wire [4:0] pipeline;
 	wire fetch, decode, execute, memory, registers;
-	wire [1:0] aluFunc;
-	wire [3:0] regXAddr, regYAddr, regWriteAddr;
-	wire jump, jumpLess, jumpEqual, compare, stack, memRead, memWrite, aluEnable, regLoad, constant, halt, zero, negative, overflow;
-	
+	wire [1:0] aluFunc, aluFuncIn;
+	wire [3:0] regXAddr, regYAddr, regWriteAddr, regXAddrIn, regYAddrIn, regWriteAddrIn;
+	wire jump, jumpLess, jumpEqual, compare, stack, memRead, memWrite, aluEnable, regLoad, constant, halt, zero, negative, overflow, jumpIn, jumpLessIn, jumpEqualIn, compareIn, stackIn, memReadIn, memWriteIn, aluEnableIn, regLoadIn, constantIn, haltIn;
+	wire [35:0] controlToAluOut;
+	wire [18:0] aluToWriteOut;
+	wire [29:0] controlToWriteOut;
+
 	assign fetch = pipeline[0];
 	assign decode = pipeline[1];
 	assign execute = pipeline[2];
 	assign memory = pipeline[3];
 	assign registers = pipeline[4];
 
+	always @(posedge reset) begin
+		address = 10'h000;
+		addr = 10'h000;
+		writeData = 16'h0000;
+		pc = 10'h000;
+		sp = 10'b1111111110;
+	end
+	always @(posedge clk) begin
+		if (halt == 1'b1) pc = pc;
+		else begin
+			programAddress = pc;
+			addr = programAddress;
+			pc = pc + 1'b1;
+		end
+	end
+	always @(posedge clk) begin
+		opcode = programData[15:12];
+		dataIn = programData[11:0];
+	end
 
 	always @(posedge reset or posedge fetch or posedge decode or posedge memory or posedge registers) begin
-		if (reset == 1'b1) begin
-			address = 10'h000;
-			addr = 10'h000;
-			writeData = 16'h0000;
-			pc = 10'h000;
-			sp = 10'b1111111110;
-		end
 		if (fetch == 1'b1) begin
 			if (halt == 1'b1) pc = pc;
 			else begin
-				address = pc;
-				addr = address;
+				programAddress = pc;
+				addr = programAddress;
 				pc = pc + 1'b1;
 			end
 		end
 		if (decode == 1'b1) begin
-			opcode = readData[15:12];
-			dataIn = readData[11:0];
 		end
 		if (memory == 1'b1) begin
 			if (memRead == 1'b1) begin
@@ -117,10 +128,8 @@ module datapath (
 		.regLoad(regLoad));
 	
 	regFile #(16) regFile (
-		.clk(registers),
+		.clk(clk),
 		.dIn(regWriteIn),
-		.inr(inr),
-		.outvalue(outvalue),
 		.readAddr0(regYAddr),
 		.readAddr1(regXAddr),
 		.writeAddr(regWriteAddr),
@@ -129,9 +138,9 @@ module datapath (
 		.dOut1(regY));
 
 	alu #(16) alu (
-		.enable((aluEnable && execute)),
-		.control(aluFunc),
-		.a(regX),
+		.enable((controlToAluOut[2])),
+		.control(controlToAluOut[1:0]),
+		.a(controlToAluOut[45:30]),
 		.b(aluInY),
 		.zero(zero),
 		.negative(negative),
@@ -139,21 +148,51 @@ module datapath (
 		.dOut(aluOut));
 
 	mux #(16) constMux (
-		.a({{6{controlOut[7]}}, controlOut}),
+		.a({{6{controlToAluOut[13]}}, controlToAluOut[13:4]}),
 		.b(aluOut),
-		.c(aluEnable),
+		.c(controlToAluOut[2]),
 		.dOut(constMuxWire));
 
 	mux #(16) memMux (
-		.a(constMuxWire),
+		.a(aluToMemoryOut),
 		.b(readData),
 		.c(memRead),
 		.dOut(regWriteIn));
 
 	mux #(16) aluIMux (
-		.a(regY),
-		.b({{6{controlOut[7]}}, controlOut}),
-		.c(constant),
+		.a(controlToAluOut[29:14]),
+		.b({{6{controlToAluOut[13]}}, controlToAluOut[13:4]}),
+		.c(controlToAluOut[3]),
 		.dOut(aluInY));
+
+	shiftArray #(46, 2) controlToAluShifter (
+		.dIn({regX, regY, controlOut, constant, aluEnable, aluFunc}),
+		.dOut(controlToAluOut),
+		.clk(clk),
+		.reset(reset));
+
+	shiftArray #(19, 3) aluToWriteShifter (
+		.dIn({constMuxWire, zero, negative, overflow}),
+		.dOut(aluToWriteOut),
+		.clk(clk),
+		.reset(reset));
+
+	shiftArray #(30, 4) controlToWriteShifter (
+		.dIn({regX, jumpEqual, jumpLess, jump, constant}),
+		.dOut(controlToWriteOut),
+		.clk(clk),
+		.reset(reset));
+
+	shiftArray #(35, 3) controlToMemoryShifter (
+		.dIn({regX, regY, remRead, memWrite, stack}),
+		.dOut(controlToMemoryOut),
+		.clk(clk),
+		.reset(reset));
+
+	shiftArray #(16, 2) aluToMemoryShifter (
+		.dIn(constMuxWire),
+		.dOut(aluToMemoryOut),
+		.clk(clk),
+		.reset(reset));
 
 endmodule	
