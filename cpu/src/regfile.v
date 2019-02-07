@@ -13,8 +13,8 @@ module regFile #(parameter N = 16, M = 4, O = 16) (
 	assign dOut0 = rf[readAddr0];
 	assign dOut1 = rf[readAddr1];
 
-	always @(posedge clk) begin
-		if (writeEnable == 1'b1) rf[writeAddr] = dIn;
+	always @(posedge writeEnable) begin
+		if (writeEnable == 1'b1) rf[writeAddr] <= dIn;
 	end
 
 endmodule

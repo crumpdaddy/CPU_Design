@@ -14,3 +14,4 @@ cpu/vvp/bench_mux
 cpu/vvp/bench_control
 cpu/vvp/bench_comparator
 cpu/vvp/bench_alu
+*.vcd

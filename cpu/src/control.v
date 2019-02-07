@@ -114,11 +114,11 @@ module control (
 				aluEnable = 1'b1;
 				regLoad = 1'b1;
 				constant = 1'b1;
-				aluFunc = 2'b00;
+				aluFunc = ((dataIn[11] == 1'b1)) ? 2'b01 : 2'b00;
 				regWriteAddr = dataIn[3:0];
 				regX = dataIn[3:0];
 				regY = dataIn[3:0];
-				dOut = {{2{dataIn[11]}},dataIn[11:4]};
+				dOut = ((dataIn[11] == 1'b1)) ? {2'b00,(~(dataIn[11:4]) + 1'b1)} : {2'b00, dataIn[11:4]};
 			end
 			4'h6: begin //comp
 				halt = 1'b0;
