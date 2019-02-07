@@ -1,14 +1,13 @@
 //Ryan Crumpler
-//CPU Design Part 3
 //Controller module
 
 module control (
 	input [3:0] opcode,
 	input [11:0] dataIn,
 	output reg [9:0] dOut,
-	output reg [1:0] aluFunc, 
+	output reg [1:0] aluFunc, shiftFunc, 
 	output reg [3:0] regWriteAddr, regX, regY,
-	output reg jump, neg, zero, compare, stack, memRead, memWrite, aluEnable, regLoad, constant, halt);
+	output reg jump, neg, zero, compare, stack, memRead, memWrite, aluEnable, regLoad, constant, halt, shiftEnable);
 
 	always @(*) begin
 		case (opcode)
@@ -25,6 +24,8 @@ module control (
 				regLoad = 1'b0;
 				constant = 1'b0;
 				aluFunc = 2'b00;
+				shiftEnable = 1'b0;
+				shiftFunc = 2'b00;
 				regWriteAddr = 4'h0;
 				regX = 4'h0;
 				regY = 4'h0;
@@ -43,6 +44,8 @@ module control (
 				regLoad = 1'b1;
 				constant = 1'b0;
 				aluFunc = 2'b10;
+				shiftEnable = 1'b0;
+				shiftFunc = 2'b00;
 				regWriteAddr = dataIn[11:8];
 				regX = dataIn[7:4];
 				regY = dataIn[3:0];
@@ -61,6 +64,8 @@ module control (
 				regLoad = 1'b1;
 				constant = 1'b0;
 				aluFunc = 2'b11;
+				shiftEnable = 1'b0;
+				shiftFunc = 2'b00;
 				regWriteAddr = dataIn[11:8];
 				regX = dataIn[7:4];
 				regY = dataIn[3:0];
@@ -79,6 +84,8 @@ module control (
 				regLoad = 1'b1;
 				constant = 1'b0;
 				aluFunc = 2'b00;
+				shiftEnable = 1'b0;
+				shiftFunc = 2'b00; 
 				regWriteAddr = dataIn[11:8];
 				regX = dataIn[7:4];
 				regY = dataIn[3:0];
@@ -97,6 +104,8 @@ module control (
 				regLoad = 1'b1;
 				constant = 1'b0;
 				aluFunc = 2'b01;
+				shiftEnable = 1'b0;
+				shiftFunc = 2'b00;
 				regWriteAddr = dataIn[11:8];
 				regX = dataIn[7:4];
 				regY = dataIn[3:0];
@@ -114,13 +123,15 @@ module control (
 				aluEnable = 1'b1;
 				regLoad = 1'b1;
 				constant = 1'b1;
+				shiftEnable = 1'b0;
+				shiftFunc = 2'b00; 
 				aluFunc = ((dataIn[11] == 1'b1)) ? 2'b01 : 2'b00;
 				regWriteAddr = dataIn[3:0];
 				regX = dataIn[3:0];
 				regY = dataIn[3:0];
 				dOut = ((dataIn[11] == 1'b1)) ? {2'b00,(~(dataIn[11:4]) + 1'b1)} : {2'b00, dataIn[11:4]};
 			end
-			4'h6: begin //comp
+			4'h6: begin //comp test
 				halt = 1'b0;
 				jump = 1'b0;
 				neg = 1'b0;
@@ -133,6 +144,8 @@ module control (
 				regLoad = 1'b0;
 				constant = 1'b0;
 				aluFunc = ((dataIn[11] == 1'b1)) ? 2'b10 : 2'b01;
+				shiftEnable = 1'b0;
+				shiftFunc = 2'b00; 
 				regWriteAddr = dataIn[7:4];
 				regX = dataIn[7:4];
 				regY = dataIn[3:0];
@@ -151,6 +164,8 @@ module control (
 				regLoad = 1'b1;
 				constant = 1'b0;
 				aluFunc = 2'b00;
+				shiftEnable = 1'b0;
+				shiftFunc = 2'b00;
 				regWriteAddr = dataIn[7:4];
 				regX = dataIn[7:4];
 				regY = dataIn[3:0];
@@ -169,12 +184,14 @@ module control (
 				regLoad = 1'b1;
 				constant = 1'b1;
 				aluFunc = 2'b00;
+				shiftEnable = 1'b0;
+				shiftFunc = 2'b00;
 				regWriteAddr = dataIn[3:0];
 				regX = dataIn[3:0];
 				regY = dataIn[3:0];
 				dOut = {{2{dataIn[11]}},dataIn[11:4]};
 			end
-			4'h9: begin //load
+			4'h9: begin //load stor pop push
 				halt = 1'b0;
 				jump = 1'b0;
 				neg = 1'b0;
@@ -187,12 +204,14 @@ module control (
 				regLoad = dataIn[10];
 				constant = 1'b0;
 				aluFunc = 2'b00;
+				shiftEnable = 1'b0;
+				shiftFunc = 2'b00;
 				regWriteAddr = ((dataIn[11] == 1'b1)) ? dataIn[3:0] : dataIn[7:4];
 				regX = ((dataIn[11] == 1'b1)) ? dataIn[3:0] : dataIn[7:4];
 				regY = dataIn[3:0];
 				dOut = 10'h000;
 			end
-			4'hA: begin //stor
+			4'hA: begin //shift
 				halt = 1'b0;
 				jump = 1'b0;
 				neg = 1'b0;
@@ -200,15 +219,17 @@ module control (
 				compare = 1'b0;
 				stack = 1'b0;
 				memRead = 1'b0;
-				memWrite = 1'b1;
+				memWrite = 1'b0;
 				aluEnable = 1'b0;
 				regLoad = 1'b0;
 				constant = 1'b0;
 				aluFunc = 2'b00;
+				shiftEnable = 1'b1;
+				shiftFunc = dataIn[11:10];
 				regWriteAddr = dataIn[7:4];
 				regX = dataIn[7:4];
-				regY = dataIn[3:0];
-				dOut = 10'h000;
+				regY = dataIn[7:4];
+				dOut = {{6{dataIn[3]}},dataIn[3:0]};
 			end
 			4'hB: begin //push
 				halt = 1'b0;
@@ -223,6 +244,8 @@ module control (
 				regLoad = 1'b0;
 				constant = 1'b0;
 				aluFunc = 2'b00;
+				shiftEnable = 1'b0;
+				shiftFunc = 2'b00;
 				regWriteAddr = dataIn[7:4];
 				regX = dataIn[3:0];
 				regY = dataIn[3:0];
@@ -241,6 +264,8 @@ module control (
 				regLoad = 1'b1;
 				constant = 1'b0;
 				aluFunc = 2'b00;
+				shiftEnable = 1'b0;
+				shiftFunc = 2'b00;
 				regWriteAddr = dataIn[3:0];
 				regX = dataIn[3:0];
 				regY = dataIn[3:0];
@@ -258,6 +283,8 @@ module control (
 				aluEnable = 1'b0;
 				regLoad = 1'b0;
 				aluFunc = 2'b00;
+				shiftEnable = 1'b0;
+				shiftFunc = 2'b00;
 				regWriteAddr = dataIn[3:0];
 				regX = dataIn[3:0];
 				regY = dataIn[3:0];
@@ -282,6 +309,8 @@ module control (
 				aluEnable = 1'b0;
 				regLoad = 1'b0;
 				aluFunc = 2'b00;
+				shiftEnable = 1'b0;
+				shiftFunc = 2'b00;
 				regWriteAddr = dataIn[3:0];
 				regX = dataIn[3:0];
 				regY = dataIn[3:0];
@@ -306,6 +335,8 @@ module control (
 				aluEnable = 1'b0;
 				regLoad = 1'b0;
 				aluFunc = 2'b00;
+				shiftEnable = 1'b0;
+				shiftFunc = 2'b00;
 				regWriteAddr = dataIn[3:0];
 				regX = dataIn[3:0];
 				regY = dataIn[3:0];

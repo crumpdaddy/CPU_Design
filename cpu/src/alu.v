@@ -5,7 +5,7 @@
 module alu #(parameter N = 16) (
 	input [1:0] control,
 	input enable,
-	input  signed [N-1:0] a,b,
+	input signed [N-1:0] a,b,
 	output reg overflow, zero, negative,
 	output reg signed [N-1:0] dOut);
 		

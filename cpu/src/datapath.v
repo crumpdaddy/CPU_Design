@@ -1,5 +1,4 @@
 //Ryan Crumpler
-//CPU Design 4
 //Top Level Datapath model
 
 module datapath (
@@ -10,15 +9,14 @@ module datapath (
 	output [9:0] dataAddress,
 	output reg [9:0] programAddress);
 
-	wire [15:0] aluInY, regX, regY, regWriteIn, aluOut, aluMuxWire, constMuxWire;
+	wire [15:0] aluInY, regX, regY, regWriteIn, aluOut, aluMuxWire, constMuxWire, shiftOut, shiftMuxWire;
 	wire [3:0] opcode;
-	reg execute, writeBack;
 	reg [9:0] sp, pc;
 	wire [11:0] dataIn;
 	wire [9:0] controlOut, memReadWire, memAddrWire, jumpConditionalWire, jumpAddressWire,  haltWire, jumpMuxWire, spReadWire, spWire, memStackWire;
-	wire [1:0] aluFunc;
+	wire [1:0] aluFunc, shiftFunc;
 	wire [3:0] regXAddr, regYAddr, regWriteAddr;
-	wire jump, jumpLess, jumpEqual, compare, stack, memRead, memWrite, aluEnable, regLoad, constant, halt, zero, negative, overflow;
+	wire jump, jumpLess, jumpEqual, compare, stack, memRead, memWrite, aluEnable, regLoad, constant, halt, zero, negative, overflow, shiftEnable;
 
 	assign opcode = programData[15:12];
 	assign dataIn = programData[11:0];
@@ -52,6 +50,8 @@ module datapath (
 		.memRead(memRead),
 		.memWrite(memWrite),
 		.aluEnable(aluEnable),
+		.shiftEnable(shiftEnable),
+		.shiftFunc(shiftFunc),
 		.halt(halt),
 		.aluFunc(aluFunc),
 		.constant(constant),
@@ -77,14 +77,27 @@ module datapath (
 		.overflow(overflow),
 		.dOut(aluOut));
 
+	shift #(16) shift (
+		.enable(shiftEnable),
+		.control(shiftFunc),
+		.amount(controlOut[3:0]),
+		.dIn(regX),
+		.dOut(shiftOut));
+
 	mux #(16) constMux (
 		.a({{6{controlOut[7]}}, controlOut}),
 		.b(aluOut),
 		.c(aluEnable),
 		.dOut(constMuxWire));
 
-	mux #(16) memMux (
+	mux #(16) shiftMux (
 		.a(constMuxWire),
+		.b(shiftOut),
+		.c(shiftEnable),
+		.dOut(shiftMuxWire));
+
+	mux #(16) memMux (
+		.a(shiftMuxWire),
 		.b(readData),
 		.c(memRead),
 		.dOut(regWriteIn));
