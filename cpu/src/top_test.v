@@ -1,10 +1,8 @@
 module topBench ();
 	reg clk, reset;
-	reg [3:0] inr;
-	wire [15:0] outvalue;
 	reg [20:0] count;
 
-	top UUT (.clk(clk),.reset(reset),.inr(inr),.outvalue(outvalue));
+	top UUT (.clk(clk),.reset(reset));
 
 	initial begin
 		$dumpfile("test.vcd");
