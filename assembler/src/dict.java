@@ -18,6 +18,10 @@ public class dict {
         dictMap.put("STOR", "90");
         dictMap.put("PUSH", "980");
         dictMap.put("POP", "9C0");
+        dictMap.put("LSL", "AC");
+        dictMap.put("LSA", "A8");
+        dictMap.put("RSL", "A4");
+        dictMap.put("RSA", "A0");
         dictMap.put("JMPL", "D");
         dictMap.put("JMPE", "E");
         dictMap.put("JUMP", "F");
