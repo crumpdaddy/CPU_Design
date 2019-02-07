@@ -40,5 +40,5 @@ PUSH $R2 #Save N
 JUMP *ack #Jump back to ack recursively
 :end POP $R15 #Return result branch
 ADD $R6 $R6 $R7 #increment reg 6
-STOR $R6 $R15 #Save Result in memory
+STOR $R15 $R6 #Save Result in memory
 HALT #Halt

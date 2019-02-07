@@ -15,3 +15,5 @@ cpu/vvp/bench_control
 cpu/vvp/bench_comparator
 cpu/vvp/bench_alu
 *.vcd
+cpu/src/out
+cpu/src/output.txt
