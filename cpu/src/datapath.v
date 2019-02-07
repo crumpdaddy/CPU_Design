@@ -125,14 +125,8 @@ module datapath (
 		.c((memRead | memWrite)),
 		.dOut(memAddrWire));
 
-	mux #(10) memReadMux (
-		.a(memAddrWire),
-		.b(regY[9:0]),
-		.c(memWrite),
-		.dOut(memReadWire));
-
 	mux #(10) memStackMux (
-		.a(memReadWire),
+		.a(memAddrWire),
 		.b(sp),
 		.c(stack),
 		.dOut(memStackWire));
@@ -145,7 +139,7 @@ module datapath (
 
 	mux #(16) memWriteMux (
 		.a(writeData),
-		.b(regX),
+		.b(regY),
 		.c(memWrite),
 		.dOut(writeData));
 

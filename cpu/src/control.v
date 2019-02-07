@@ -132,7 +132,7 @@ module control (
 				aluEnable = 1'b1;
 				regLoad = 1'b0;
 				constant = 1'b0;
-				aluFunc = 2'b01;
+				aluFunc = ((dataIn[11] == 1'b1)) ? 2'b10 : 2'b01;
 				regWriteAddr = dataIn[7:4];
 				regX = dataIn[7:4];
 				regY = dataIn[3:0];
@@ -180,15 +180,15 @@ module control (
 				neg = 1'b0;
 				zero = 1'b0;
 				compare = 1'b0;
-				stack = 1'b0;
-				memRead = 1'b1;
-				memWrite = 1'b0;
+				stack = dataIn[11];
+				memRead = dataIn[10];
+				memWrite = ~dataIn[10];
 				aluEnable = 1'b0;
-				regLoad = 1'b1;
+				regLoad = dataIn[10];
 				constant = 1'b0;
 				aluFunc = 2'b00;
-				regWriteAddr = dataIn[7:4];
-				regX = dataIn[7:4];
+				regWriteAddr = ((dataIn[11] == 1'b1)) ? dataIn[3:0] : dataIn[7:4];
+				regX = ((dataIn[11] == 1'b1)) ? dataIn[3:0] : dataIn[7:4];
 				regY = dataIn[3:0];
 				dOut = 10'h000;
 			end
