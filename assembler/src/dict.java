@@ -11,12 +11,13 @@ public class dict {
         dictMap.put("SUB", "4");
         dictMap.put("ADDI", "5");
         dictMap.put("COMP", "60");
+        dictMap.put("TEST", "68");
         dictMap.put("COPY", "70");
         dictMap.put("COPC", "8");
-        dictMap.put("LOAD", "90");
-        dictMap.put("STOR", "A0");
-        dictMap.put("PUSH", "B00");
-        dictMap.put("POP", "C00");
+        dictMap.put("LOAD", "94");
+        dictMap.put("STOR", "90");
+        dictMap.put("PUSH", "980");
+        dictMap.put("POP", "9C0");
         dictMap.put("JMPL", "D");
         dictMap.put("JMPE", "E");
         dictMap.put("JUMP", "F");

@@ -24,7 +24,7 @@ public class assembler {
     }
 
     public void readFile(String fileName) throws IOException {
-        File file = new File(fileName);
+        File file = new File("./programs/" + fileName);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String str;
         int i = 0;
@@ -40,7 +40,7 @@ public class assembler {
     }
 
     public void readInitialFile(String fileName) throws Exception {
-        File file = new File(fileName);
+        File file = new File("./programs/" + fileName);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String str;
         int i = 1;
