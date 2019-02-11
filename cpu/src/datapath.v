@@ -57,7 +57,6 @@ module datapath (
 		.regLoad(regLoad));
 	
 	regFile #(16) regFile (
-		.clk(clk),
 		.dIn(regWriteIn),
 		.readAddr0(regYAddr),
 		.readAddr1(regXAddr),

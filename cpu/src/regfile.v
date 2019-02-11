@@ -3,7 +3,7 @@
 //Register File Module
 
 module regFile #(parameter N = 16, M = 4, O = 16) (
-	input clk, writeEnable,
+	input writeEnable,
 	input [N-1:0] dIn, 
 	input [M-1:0] readAddr0, readAddr1, writeAddr,
 	output [N-1:0] dOut0, dOut1);
