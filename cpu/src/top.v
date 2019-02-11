@@ -6,15 +6,13 @@ module top (
 	wire WE;
 
 
-	memory #(10,16,1024) ROM (
-		.clk(clk),
+	memory #(10,16,1024,"output.txt") ROM (
 		.WE(1'b0),
 		.address(programAddress),
 		.writeData(16'h0000),
 		.readData(programData));
 
-	memory #(10,16,1024) RAM (
-		.clk(clk),
+	memory #(10,16,1024,"ram.txt") RAM (
 		.WE((WE & ~clk)),
 		.address(dataAddress),
 		.writeData(writeData),

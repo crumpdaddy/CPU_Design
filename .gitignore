@@ -21,3 +21,5 @@ cpu/designs/~$design_exp.xlsx
 cpu/designs/~$design_exp.xlsx
 assembler/output.txt
 cpu/designs/~$design_exp.xlsx
+cpu/src/ram.txt
+assembler/ram.txt

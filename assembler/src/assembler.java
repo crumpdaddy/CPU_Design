@@ -10,6 +10,7 @@ public class assembler {
     private dict assemblerDict;
     private HashMap<String, Integer> labels;
     private ArrayList<String> assembledCode;
+    private ArrayList<String> ramCode;
     private ArrayList<String>  assemblyCode;
     private HashMap<Integer ,String> initialMemory;
     private int offset;
@@ -17,10 +18,14 @@ public class assembler {
     public assembler()  {
         assemblerDict = new dict();
         labels = new HashMap<>();
-        assembledCode = new ArrayList<>();
+        assembledCode = new ArrayList<>(1024);
+        ramCode = new ArrayList<>(1024);
         assemblyCode = new ArrayList<>();
         initialMemory = new HashMap<>();
         offset = 0;
+        for (int i = 0; i < 1024; i++) {
+            ramCode.add("0000");
+        }
     }
 
     public void readFile(String fileName) throws IOException {
@@ -109,8 +114,10 @@ public class assembler {
     }
 
     public void outputFile() throws IOException {
-        Path file = Paths.get("output.txt");
-        Files.write(file, assembledCode, Charset.forName("UTF-8"));
+        Path romFile = Paths.get("output.txt");
+        Path ramFile = Paths.get("ram.txt");
+        Files.write(romFile, assembledCode, Charset.forName("UTF-8"));
+        Files.write(ramFile, ramCode, Charset.forName("UTF-8"));
     }
 
     public void setMemory(int address, String val) throws Exception {
@@ -163,7 +170,7 @@ public class assembler {
             System.out.println("Data too large, only using lower bits");
             data = data.substring(data.length() - 5);
         }
-        assembledCode.set(address, data);
+        ramCode.set(address, data);
     }
 
     private boolean isInt(String str) {
