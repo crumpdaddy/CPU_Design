@@ -17,3 +17,7 @@ cpu/vvp/bench_alu
 *.vcd
 cpu/src/out
 cpu/src/output.txt
+cpu/designs/~$design_exp.xlsx
+cpu/designs/~$design_exp.xlsx
+assembler/output.txt
+cpu/designs/~$design_exp.xlsx

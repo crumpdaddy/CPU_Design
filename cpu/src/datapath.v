@@ -14,7 +14,8 @@ module datapath (
 	reg [9:0] sp, pc;
 	wire [11:0] dataIn;
 	wire [9:0] controlOut, memReadWire, memAddrWire, jumpConditionalWire, jumpAddressWire,  haltWire, jumpMuxWire, spReadWire, spWire, memStackWire;
-	wire [1:0] aluFunc, shiftFunc;
+	wire [2:0] aluFunc;
+	wire [1:0] shiftFunc;
 	wire [3:0] regXAddr, regYAddr, regWriteAddr;
 	wire jump, jumpLess, jumpEqual, compare, stack, memRead, memWrite, aluEnable, regLoad, constant, halt, zero, negative, overflow, shiftEnable;
 
