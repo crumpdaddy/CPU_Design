@@ -11,9 +11,9 @@ module datapath (
 
 	wire [15:0] aluInY, regX, regY, regWriteIn, aluOut, aluMuxWire, constMuxWire, shiftOut, shiftMuxWire;
 	wire [3:0] opcode;
-	reg [9:0] sp, pc;
+	reg [9:0] SP;
 	wire [11:0] dataIn;
-	wire [9:0] controlOut, memReadWire, memAddrWire, jumpConditionalWire, jumpAddressWire,  haltWire, jumpMuxWire, spReadWire, spWire, memStackWire;
+	wire [9:0] controlOut, memReadWire, memAddrWire, jumpConditionalWire, jumpAddressWire, haltWire, PC, spReadWire, spWire, memStackWire;
 	wire [2:0] aluFunc;
 	wire [1:0] shiftFunc;
 	wire [3:0] regXAddr, regYAddr, regWriteAddr;
@@ -26,13 +26,11 @@ module datapath (
 	always @(posedge reset or posedge clk) begin
 		if (reset == 1'b1) begin
 			programAddress = 10'h000;
-			pc = 10'h000;
-			sp = 10'b1111111110;
+			SP = 10'b1111111110;
 		end
 		else begin
-			sp = spWire;
-			pc = jumpMuxWire;
-			programAddress = pc;
+			SP = spWire;
+			programAddress = PC;
 		end
 	end
 
@@ -116,8 +114,8 @@ module datapath (
 		dOut(jumpAddressWire));
 	
 	mux #(10) haltMux (
-		.a((pc + 1'b1)),
-		.b(pc),
+		.a((programAddress + 1'b1)),
+		.b(programAddress),
 		.c(halt),
 		.dOut(haltWire));
 	
@@ -131,7 +129,7 @@ module datapath (
 		.a(jumpConditionalWire),
 		.b(jumpAddressWire),
 		.c((jump & (~jumpLess & ~jumpEqual))),
-		.dOut(jumpMuxWire));
+		.dOut(PC));
 	
 	mux #(10) memAddrMux (
 		.a(10'b0000000000),
@@ -141,7 +139,7 @@ module datapath (
 
 	mux #(10) memStackMux (
 		.a(memAddrWire),
-		.b(sp),
+		.b(SP),
 		.c(stack),
 		.dOut(memStackWire));
 	
@@ -158,14 +156,14 @@ module datapath (
 		.dOut(writeData));
 
 	mux #(10) readStackMux (
-		.a(sp),
-		.b((sp + 1'b1)),
+		.a(SP),
+		.b((SP + 1'b1)),
 		.c((memRead & stack)),
 		.dOut(spReadWire));
 
 	mux #(10) writeStackMux (
 		.a(spReadWire),
-		.b((sp - 1'b1)),
+		.b((SP - 1'b1)),
 		.c((memWrite & stack)),
 		.dOut(spWire));
 
